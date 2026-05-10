@@ -5,6 +5,12 @@ import 'package:intl/intl.dart';
 
 import 'login_screen.dart';
 
+const Color mainBlue = Color(0xFF1D4ED8);
+const Color lightBlue = Color(0xFFDBEAFE);
+const Color darkText = Color(0xFF111827);
+const Color greyText = Color(0xFF64748B);
+const Color pageBackground = Color(0xFFF5F7FB);
+
 // Home Screen designed as the task management/problem solving part.
 // User can add tasks, search tasks, and move tasks between boards.
 // Firebase function used here for logout:
@@ -145,56 +151,118 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F7FB),
-        elevation: 0,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'TaskMate',
-              style: TextStyle(fontWeight: FontWeight.w900),
+      backgroundColor: pageBackground,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(82),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF1D4ED8), Color(0xFF2563EB)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            Text(
-              'Smart Task Board',
-              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(28),
+              bottomRight: Radius.circular(28),
             ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            onPressed: logout,
-            icon: const Icon(Icons.logout_rounded),
           ),
-        ],
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 8, 10, 12),
+              child: Row(
+                children: [
+                  Container(
+                    height: 46,
+                    width: 46,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Icon(Icons.checklist_rounded,
+                        color: mainBlue, size: 30),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'TaskMate',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        Text(
+                          'Smart Task Manager',
+                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Logout',
+                    onPressed: logout,
+                    icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
           Container(
-            margin: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+            margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF1D4ED8), Color(0xFF2563EB)],
-              ),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.dashboard_customize_rounded,
-                        color: Colors.white, size: 34),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'TaskMate Smart Task Manager',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Container(
+                      height: 52,
+                      width: 52,
+                      decoration: BoxDecoration(
+                        color: lightBlue,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Icon(Icons.dashboard_customize_rounded,
+                          color: mainBlue, size: 30),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Plan, Track, Complete',
+                            style: TextStyle(
+                              color: darkText,
+                              fontSize: 19,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 3),
+                          Text(
+                            'Swipe cards between boards like Jira',
+                            style: TextStyle(color: greyText, fontSize: 13),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -202,12 +270,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 14),
                 TextField(
                   decoration: const InputDecoration(
-                    labelText: 'Search task',
+                    labelText: 'Search task by title',
                     prefixIcon: Icon(Icons.search),
                   ),
                   onChanged: (value) {
                     setState(() => searchText = value);
                   },
+                ),
+                const SizedBox(height: 12),
+                const Row(
+                  children: [
+                    _HeaderChip(icon: Icons.today, text: 'Today'),
+                    SizedBox(width: 8),
+                    _HeaderChip(icon: Icons.flag, text: 'Priority'),
+                    SizedBox(width: 8),
+                    _HeaderChip(icon: Icons.category, text: 'Category'),
+                  ],
                 ),
               ],
             ),
@@ -250,7 +328,26 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _FooterItem(icon: Icons.check_circle, label: 'Tasks'),
+            _FooterItem(icon: Icons.swipe, label: 'Swipe'),
+            _FooterItem(icon: Icons.cloud_done, label: 'Firebase'),
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: mainBlue,
+        foregroundColor: Colors.white,
         onPressed: () => openTaskForm(),
         icon: const Icon(Icons.add),
         label: const Text('Add Task'),
@@ -604,5 +701,65 @@ class _HomeScreenState extends State<HomeScreen> {
 
     titleController.dispose();
     descriptionController.dispose();
+  }
+}
+
+class _HeaderChip extends StatelessWidget {
+  const _HeaderChip({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 9),
+        decoration: BoxDecoration(
+          color: lightBlue,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 18, color: mainBlue),
+            const SizedBox(height: 3),
+            Text(
+              text,
+              style: const TextStyle(
+                color: mainBlue,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FooterItem extends StatelessWidget {
+  const _FooterItem({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: mainBlue, size: 22),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            color: greyText,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
   }
 }

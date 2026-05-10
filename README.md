@@ -15,6 +15,7 @@ lib/
 ## What the app can do
 
 - Login/signup screens formatted to match the submitted TaskMate design PDF
+- Proper app bar, dashboard header, footer, and blue TaskMate theme
 - Code kept basic, human-readable, and commented for class explanation
 - Register a new user
 - Login and logout
