@@ -12,6 +12,8 @@ lib/main.dart
 
 - Register a new user
 - Login and logout
+- Login form validation using `Form` and `TextFormField`
+- Remember email using `SharedPreferences`
 - Save user account data in Firebase
 - Add tasks
 - Edit tasks
@@ -27,6 +29,7 @@ lib/main.dart              Main app code
 lib/firebase_options.dart  Firebase config file
 pubspec.yaml              App packages/dependencies
 FIREBASE_SETUP.md         Firebase setup instructions
+LECTURE_ALIGNMENT.md      Explains how code follows lecture topics
 ```
 
 ## How to run

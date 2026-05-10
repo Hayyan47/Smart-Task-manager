@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
 
@@ -65,12 +66,42 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final nameController = TextEditingController();
 
   bool isLogin = true;
+  bool rememberMe = false;
   bool loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadSavedEmail();
+  }
+
+  Future<void> loadSavedEmail() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String savedEmail = preferences.getString('savedEmail') ?? '';
+
+    if (savedEmail.isNotEmpty) {
+      setState(() {
+        emailController.text = savedEmail;
+        rememberMe = true;
+      });
+    }
+  }
+
+  Future<void> saveEmailIfNeeded(String email) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    if (rememberMe) {
+      await preferences.setString('savedEmail', email);
+    } else {
+      await preferences.remove('savedEmail');
+    }
+  }
 
   @override
   void dispose() {
@@ -85,19 +116,15 @@ class _LoginPageState extends State<LoginPage> {
     String password = passwordController.text.trim();
     String name = nameController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      showMessage('Please enter email and password');
-      return;
-    }
-
-    if (password.length < 6) {
-      showMessage('Password must be at least 6 characters');
+    if (!formKey.currentState!.validate()) {
       return;
     }
 
     setState(() => loading = true);
 
     try {
+      await saveEmailIfNeeded(email);
+
       if (isLogin) {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
@@ -141,68 +168,104 @@ class _LoginPageState extends State<LoginPage> {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.task_alt, size: 80, color: Colors.blue),
-              const SizedBox(height: 10),
-              const Text(
-                'TaskMate',
-                style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
-              ),
-              const Text('Smart Task Manager'),
-              const SizedBox(height: 30),
-              Text(
-                isLogin ? 'LOGIN' : 'REGISTER',
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              if (!isLogin)
-                TextField(
-                  controller: nameController,
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.task_alt, size: 80, color: Colors.blue),
+                const SizedBox(height: 10),
+                const Text(
+                  'TaskMate',
+                  style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                ),
+                const Text('Smart Task Manager'),
+                const SizedBox(height: 30),
+                Text(
+                  isLogin ? 'LOGIN' : 'REGISTER',
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                if (!isLogin)
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Name',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (!isLogin && (value == null || value.trim().isEmpty)) {
+                        return 'Please enter your name';
+                      }
+                      return null;
+                    },
+                  ),
+                if (!isLogin) const SizedBox(height: 12),
+                TextFormField(
+                  controller: emailController,
                   decoration: const InputDecoration(
-                    labelText: 'Name',
+                    labelText: 'Email',
                     border: OutlineInputBorder(),
                   ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter email';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Please enter valid email';
+                    }
+                    return null;
+                  },
                 ),
-              if (!isLogin) const SizedBox(height: 12),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter password';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
+                CheckboxListTile(
+                  value: rememberMe,
+                  title: const Text('Remember my email'),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  onChanged: (value) {
+                    setState(() => rememberMe = value ?? false);
+                  },
                 ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: loading ? null : submit,
-                child: loading
-                    ? const CircularProgressIndicator()
-                    : Text(isLogin ? 'Login' : 'Create Account'),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    isLogin = !isLogin;
-                  });
-                },
-                child: Text(
-                  isLogin
-                      ? 'Do not have account? Register'
-                      : 'Already have account? Login',
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: loading ? null : submit,
+                  child: loading
+                      ? const CircularProgressIndicator()
+                      : Text(isLogin ? 'Login' : 'Create Account'),
                 ),
-              ),
-            ],
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      isLogin = !isLogin;
+                    });
+                  },
+                  child: Text(
+                    isLogin
+                        ? 'Do not have account? Register'
+                        : 'Already have account? Login',
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
