@@ -186,47 +186,84 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return SizedBox(
       width: 300,
-      child: Card(
-        margin: const EdgeInsets.only(right: 12, bottom: 12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+      child: DragTarget<QueryDocumentSnapshot<Map<String, dynamic>>>(
+        // When a task is dropped on this board, update its status in Firebase.
+        onAcceptWithDetails: (details) {
+          moveTask(details.data.id, status);
+        },
+        builder: (context, candidateTasks, rejectedTasks) {
+          bool taskIsHoveringHere = candidateTasks.isNotEmpty;
+
+          return Card(
+            color: taskIsHoveringHere ? Colors.blue.shade50 : null,
+            margin: const EdgeInsets.only(right: 12, bottom: 12),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 8,
-                    backgroundColor: statusColor(status),
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 8,
+                        backgroundColor: statusColor(status),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '$status (${statusTasks.length})',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Long press and drag task here',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 8),
                   Expanded(
-                    child: Text(
-                      '$status (${statusTasks.length})',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+                    child: statusTasks.isEmpty
+                        ? const Center(child: Text('Drop task here'))
+                        : ListView(
+                            children: [
+                              for (var task in statusTasks) buildTaskCard(task),
+                            ],
+                          ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: statusTasks.isEmpty
-                    ? const Center(child: Text('No tasks here'))
-                    : ListView(
-                        children: [
-                          for (var task in statusTasks) buildTaskCard(task),
-                        ],
-                      ),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget buildTaskCard(QueryDocumentSnapshot<Map<String, dynamic>> task) {
+    return LongPressDraggable<QueryDocumentSnapshot<Map<String, dynamic>>>(
+      data: task,
+      feedback: Material(
+        color: Colors.transparent,
+        child: SizedBox(
+          width: 260,
+          child: Opacity(
+            opacity: 0.90,
+            child: buildTaskCardDesign(task),
+          ),
+        ),
+      ),
+      childWhenDragging: Opacity(
+        opacity: 0.35,
+        child: buildTaskCardDesign(task),
+      ),
+      child: buildTaskCardDesign(task),
+    );
+  }
+
+  Widget buildTaskCardDesign(QueryDocumentSnapshot<Map<String, dynamic>> task) {
     Map<String, dynamic> data = task.data();
     DateTime dueDate = readDate(data['dueDate']);
     String status = getTaskStatus(data);
@@ -241,6 +278,8 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Row(
               children: [
+                const Icon(Icons.drag_indicator, color: Colors.grey),
+                const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     data['title'] ?? '',

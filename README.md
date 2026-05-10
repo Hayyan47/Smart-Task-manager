@@ -21,6 +21,7 @@ lib/
 - Edit tasks
 - Delete tasks
 - Move tasks like Jira/Kanban from left to right: To Do → In Progress → In Review → Done
+- Drag tasks between boards using long press gesture
 - Search tasks by title
 - Store tasks in Firebase Firestore
 

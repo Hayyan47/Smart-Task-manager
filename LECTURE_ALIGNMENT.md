@@ -43,4 +43,4 @@ The task screen works like a simple Jira/Kanban board, arranged left to right li
 3. In Review
 4. Done
 
-Each task has a dropdown to move it from one status to another.
+Each task has a dropdown to move it from one status to another. You can also long press and drag a task card into another board column.
