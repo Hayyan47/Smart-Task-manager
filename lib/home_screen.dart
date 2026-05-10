@@ -97,37 +97,80 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Color statusColor(String status) {
-    if (status == 'To Do') return Colors.grey;
-    if (status == 'In Progress') return Colors.blue;
-    if (status == 'In Review') return Colors.orange;
-    return Colors.green;
+    if (status == 'To Do') return const Color(0xFF64748B);
+    if (status == 'In Progress') return const Color(0xFF1D4ED8);
+    if (status == 'In Review') return const Color(0xFFF59E0B);
+    return const Color(0xFF16A34A);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TaskMate Board'),
+        backgroundColor: const Color(0xFFF5F7FB),
+        elevation: 0,
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'TaskMate',
+              style: TextStyle(fontWeight: FontWeight.w900),
+            ),
+            Text(
+              'Smart Task Board',
+              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             onPressed: logout,
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout_rounded),
           ),
         ],
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: TextField(
-              decoration: const InputDecoration(
-                labelText: 'Search task',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1D4ED8), Color(0xFF2563EB)],
               ),
-              onChanged: (value) {
-                setState(() => searchText = value);
-              },
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.dashboard_customize_rounded,
+                        color: Colors.white, size: 34),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Manage your tasks like Jira',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Search task',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                  onChanged: (value) {
+                    setState(() => searchText = value);
+                  },
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -152,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // To Do -> In Progress -> In Review -> Done.
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 80),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -195,7 +238,16 @@ class _HomeScreenState extends State<HomeScreen> {
           bool taskIsHoveringHere = candidateTasks.isNotEmpty;
 
           return Card(
-            color: taskIsHoveringHere ? Colors.blue.shade50 : null,
+            elevation: 0,
+            color: taskIsHoveringHere ? const Color(0xFFEFF6FF) : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+              side: BorderSide(
+                color: taskIsHoveringHere
+                    ? const Color(0xFF1D4ED8)
+                    : const Color(0xFFE2E8F0),
+              ),
+            ),
             margin: const EdgeInsets.only(right: 12, bottom: 12),
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -221,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 4),
                   const Text(
                     'Long press and drag task here',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                   ),
                   const SizedBox(height: 8),
                   Expanded(
@@ -269,8 +321,13 @@ class _HomeScreenState extends State<HomeScreen> {
     String status = getTaskStatus(data);
 
     return Card(
-      color: const Color(0xFFF9FAFB),
-      margin: const EdgeInsets.symmetric(vertical: 6),
+      elevation: 0,
+      color: const Color(0xFFF8FAFC),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: Color(0xFFE2E8F0)),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 7),
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
@@ -278,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.drag_indicator, color: Colors.grey),
+                const Icon(Icons.drag_indicator, color: Color(0xFF64748B)),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
@@ -302,11 +359,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            Text(data['description'] ?? ''),
-            const SizedBox(height: 6),
-            Text('Due: ${DateFormat('dd MMM yyyy, hh:mm a').format(dueDate)}'),
             Text(
-                'Priority: ${data['priority']} | Category: ${data['category']}'),
+              data['description'] ?? '',
+              style: const TextStyle(color: Color(0xFF475569)),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Due: ${DateFormat('dd MMM yyyy, hh:mm a').format(dueDate)}',
+              style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+            ),
+            Text(
+              'Priority: ${data['priority']} | Category: ${data['category']}',
+              style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+            ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: status,
