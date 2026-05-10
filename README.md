@@ -14,7 +14,8 @@ lib/
 
 ## What the app can do
 
-- Login/signup screens formatted to match the submitted TaskMate design
+- Login/signup screens formatted to match the submitted TaskMate design PDF
+- Code kept basic, human-readable, and commented for class explanation
 - Register a new user
 - Login and logout
 - Login/signup form validation using `Form` and `TextFormField`

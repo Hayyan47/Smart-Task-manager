@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 
-// Signup Screen
+// Signup Screen designed according to the submitted PDF.
+// Problem solved here:
+// 1. New student enters name, email, password and confirm password.
+// 2. App validates the fields.
+// 3. Firebase creates the account.
+// 4. User moves to HomeScreen.
 // Firebase function used here:
 // createUserWithEmailAndPassword(email, password)
 class SignupScreen extends StatefulWidget {
@@ -33,10 +38,12 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> signupUser() async {
+    // First validate name, email, password and confirm password.
     if (!formKey.currentState!.validate()) {
       return;
     }
 
+    // Show loading circle while Firebase creates account.
     setState(() => loading = true);
 
     try {
@@ -93,6 +100,15 @@ class _SignupScreenState extends State<SignupScreen> {
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF111827),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Sign in to continue',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Color(0xFF64748B),
                       ),
                       textAlign: TextAlign.center,
                     ),

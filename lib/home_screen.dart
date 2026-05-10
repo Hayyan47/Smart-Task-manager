@@ -5,9 +5,11 @@ import 'package:intl/intl.dart';
 
 import 'login_screen.dart';
 
-// Home Screen
+// Home Screen designed as the task management/problem solving part.
+// User can add tasks, search tasks, and move tasks between boards.
 // Firebase function used here for logout:
 // signOut()
+// Firestore is used here to save task data.
 // This screen also contains the simple Jira style task board.
 
 class HomeScreen extends StatefulWidget {
@@ -46,6 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> moveTask(String taskId, String newStatus) async {
+    // This solves the Jira style movement problem.
+    // When a task is dragged/dropped or selected from dropdown,
+    // its board/status is updated in Firebase.
     await taskCollection.doc(taskId).update({
       'status': newStatus,
       'completed': newStatus == 'Done',

@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'signup_screen.dart';
 
-// Login Screen
+// Login Screen designed according to the submitted PDF.
+// Problem solved here:
+// 1. Student enters email and password.
+// 2. App checks/validates the fields.
+// 3. Firebase logs in the user.
+// 4. User moves to HomeScreen.
 // Firebase function used here:
 // signInWithEmailAndPassword(email, password)
 class LoginScreen extends StatefulWidget {
@@ -30,10 +35,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> loginUser() async {
+    // First check if email/password fields are correct.
     if (!formKey.currentState!.validate()) {
       return;
     }
 
+    // Show loading circle while Firebase is checking login.
     setState(() => loading = true);
 
     try {
@@ -189,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text('Do not have account?'),
+                        const Text("Don't have account?"),
                         TextButton(
                           onPressed: () {
                             Navigator.push(
@@ -214,6 +221,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
+// This logo/header is used on both Login and Signup screens
+// to match the provided TaskMate design.
 class TaskMateLogo extends StatelessWidget {
   const TaskMateLogo({super.key});
 
