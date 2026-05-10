@@ -86,7 +86,7 @@ class _SignupScreenState extends State<SignupScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 430),
+              constraints: const BoxConstraints(maxWidth: 520),
               child: Form(
                 key: formKey,
                 child: Column(

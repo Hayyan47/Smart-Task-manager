@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: pageBackground,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(82),
+        preferredSize: const Size.fromHeight(76),
         child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -168,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 8, 10, 12),
+              padding: const EdgeInsets.fromLTRB(18, 6, 10, 10),
               child: Row(
                 children: [
                   Container(
@@ -216,8 +216,8 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         children: [
           Container(
-            margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            padding: const EdgeInsets.all(18),
+            margin: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
@@ -267,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
                 TextField(
                   decoration: const InputDecoration(
                     labelText: 'Search task by title',
@@ -277,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() => searchText = value);
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 const Row(
                   children: [
                     _HeaderChip(icon: Icons.today, text: 'Today'),
@@ -312,16 +312,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 // To Do -> In Progress -> In Review -> Done.
                 // Swipe task card right to move forward.
                 // Swipe task card left to move backward.
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (String status in taskStatuses)
-                        buildStatusColumn(status, allTasks),
-                    ],
-                  ),
+                return LayoutBuilder(
+                  builder: (context, boardSize) {
+                    double columnWidth;
+
+                    if (boardSize.maxWidth >= 900) {
+                      // On laptop/web, show all four boards wide across the screen.
+                      columnWidth = (boardSize.maxWidth - 48) / 4;
+                    } else {
+                      // On phone, one board should almost fill the screen width.
+                      columnWidth = boardSize.maxWidth - 32;
+                    }
+
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 70),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (String status in taskStatuses)
+                            buildStatusColumn(status, allTasks, columnWidth),
+                        ],
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -355,8 +369,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildStatusColumn(String status,
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> allTasks) {
+  Widget buildStatusColumn(
+      String status,
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> allTasks,
+      double columnWidth) {
     List<QueryDocumentSnapshot<Map<String, dynamic>>> statusTasks = [];
 
     for (var task in allTasks) {
@@ -366,7 +382,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return SizedBox(
-      width: 300,
+      width: columnWidth,
       child: Card(
         elevation: 0,
         color: Colors.white,

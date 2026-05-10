@@ -16,6 +16,7 @@ lib/
 
 - Login/signup screens formatted to match the submitted TaskMate design PDF
 - Proper app bar, dashboard header, footer, and blue TaskMate theme
+- Responsive wider layout for web/desktop while still working on phone
 - Code kept basic, human-readable, and commented for class explanation
 - Register a new user
 - Login and logout
