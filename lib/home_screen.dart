@@ -49,12 +49,46 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> moveTask(String taskId, String newStatus) async {
     // This solves the Jira style movement problem.
-    // When a task is dragged/dropped or selected from dropdown,
+    // When a task is moved by swipe or dropdown,
     // its board/status is updated in Firebase.
     await taskCollection.doc(taskId).update({
       'status': newStatus,
       'completed': newStatus == 'Done',
     });
+  }
+
+  String nextStatus(String currentStatus) {
+    int index = taskStatuses.indexOf(currentStatus);
+
+    if (index < taskStatuses.length - 1) {
+      return taskStatuses[index + 1];
+    }
+
+    return currentStatus;
+  }
+
+  String previousStatus(String currentStatus) {
+    int index = taskStatuses.indexOf(currentStatus);
+
+    if (index > 0) {
+      return taskStatuses[index - 1];
+    }
+
+    return currentStatus;
+  }
+
+  void swipeTask(String taskId, String currentStatus, bool moveForward) {
+    String newStatus;
+
+    if (moveForward) {
+      newStatus = nextStatus(currentStatus);
+    } else {
+      newStatus = previousStatus(currentStatus);
+    }
+
+    if (newStatus != currentStatus) {
+      moveTask(taskId, newStatus);
+    }
   }
 
   // Old tasks may not have a status field, so this function gives them a default status.
@@ -155,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Manage your tasks like Jira',
+                        'TaskMate Smart Task Manager',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 19,
@@ -195,9 +229,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 List<QueryDocumentSnapshot<Map<String, dynamic>>> allTasks =
                     filterTasks(snapshot.data!.docs);
 
-                // This makes a simple Jira/Kanban board.
-                // The columns go from left to right like Jira:
+                // This makes a simple board.
+                // The columns go from left to right:
                 // To Do -> In Progress -> In Review -> Done.
+                // Swipe task card right to move forward.
+                // Swipe task card left to move backward.
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
@@ -234,88 +270,74 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return SizedBox(
       width: 300,
-      child: DragTarget<QueryDocumentSnapshot<Map<String, dynamic>>>(
-        // When a task is dropped on this board, update its status in Firebase.
-        onAcceptWithDetails: (details) {
-          moveTask(details.data.id, status);
-        },
-        builder: (context, candidateTasks, rejectedTasks) {
-          bool taskIsHoveringHere = candidateTasks.isNotEmpty;
-
-          return Card(
-            elevation: 0,
-            color: taskIsHoveringHere ? const Color(0xFFEFF6FF) : Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(22),
-              side: BorderSide(
-                color: taskIsHoveringHere
-                    ? const Color(0xFF1D4ED8)
-                    : const Color(0xFFE2E8F0),
-              ),
-            ),
-            margin: const EdgeInsets.only(right: 12, bottom: 12),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: Card(
+        elevation: 0,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+          side: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        margin: const EdgeInsets.only(right: 12, bottom: 12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 8,
-                        backgroundColor: statusColor(status),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '$status (${statusTasks.length})',
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
+                  CircleAvatar(
+                    radius: 8,
+                    backgroundColor: statusColor(status),
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Long press and drag task here',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: statusTasks.isEmpty
-                        ? const Center(child: Text('Drop task here'))
-                        : ListView(
-                            children: [
-                              for (var task in statusTasks) buildTaskCard(task),
-                            ],
-                          ),
+                    child: Text(
+                      '$status (${statusTasks.length})',
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
-            ),
-          );
-        },
+              const SizedBox(height: 4),
+              const Text(
+                'Swipe card right/left to move',
+                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: statusTasks.isEmpty
+                    ? const Center(child: Text('No tasks here'))
+                    : ListView(
+                        children: [
+                          for (var task in statusTasks) buildTaskCard(task),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   Widget buildTaskCard(QueryDocumentSnapshot<Map<String, dynamic>> task) {
-    return LongPressDraggable<QueryDocumentSnapshot<Map<String, dynamic>>>(
-      data: task,
-      feedback: Material(
-        color: Colors.transparent,
-        child: SizedBox(
-          width: 260,
-          child: Opacity(
-            opacity: 0.90,
-            child: buildTaskCardDesign(task),
-          ),
-        ),
-      ),
-      childWhenDragging: Opacity(
-        opacity: 0.35,
-        child: buildTaskCardDesign(task),
-      ),
+    Map<String, dynamic> data = task.data();
+    String status = getTaskStatus(data);
+
+    return GestureDetector(
+      // Basic gesture:
+      // Swipe right = move to next board.
+      // Swipe left = move to previous board.
+      onHorizontalDragEnd: (details) {
+        double swipeSpeed = details.primaryVelocity ?? 0;
+
+        if (swipeSpeed < -200) {
+          swipeTask(task.id, status, true);
+        } else if (swipeSpeed > 200) {
+          swipeTask(task.id, status, false);
+        }
+      },
       child: buildTaskCardDesign(task),
     );
   }
@@ -340,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.drag_indicator, color: Color(0xFF64748B)),
+                const Icon(Icons.swap_horiz, color: Color(0xFF64748B)),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
