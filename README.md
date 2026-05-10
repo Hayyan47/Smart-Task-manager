@@ -1,41 +1,57 @@
-# TaskMate
+# TaskMate - Smart Task Manager
 
-TaskMate is a Flutter smart task manager built from the project proposal/design. It includes Firebase email/password authentication, Firestore task storage, task filtering/search, CRUD operations, completion tracking, priority/category fields, and local deadline reminders.
+This is a simple Flutter student project for managing tasks.
 
-## Features
+The code is intentionally kept basic and easy to understand. Most of the app is inside:
 
-- Register, login, logout, password validation
-- Firebase Auth for secure accounts
-- Firestore database with per-user tasks
-- Add, edit, delete, and complete tasks
-- Task fields: title, description, due date/time, priority, category
-- Filters: All, Today, Upcoming, Completed
+```text
+lib/main.dart
+```
+
+## What the app can do
+
+- Register a new user
+- Login and logout
+- Save user account data in Firebase
+- Add tasks
+- Edit tasks
+- Delete tasks
+- Mark tasks as completed
 - Search tasks by title
-- Local notification reminder 1 hour before deadline
-- Clean UI matching the submitted login/register design direction
+- Filter tasks by All, Today, Upcoming, and Completed
+- Store tasks in Firebase Firestore
 
-## Project status
+## Main files
 
-The app code is ready, but Flutter is not installed on the machine where this was generated, so it was not compiled here. To run it locally, install Flutter, configure Firebase, then run the commands below.
+```text
+lib/main.dart              Main app code
+lib/firebase_options.dart  Firebase config file
+pubspec.yaml              App packages/dependencies
+FIREBASE_SETUP.md         Firebase setup instructions
+```
 
-## Getting started
+## How to run
+
+First install Flutter, then run:
 
 ```bash
-cd taskmate_flutter
-flutter create . --platforms=android,ios
 flutter pub get
-flutterfire configure --project=<your-firebase-project-id>
 flutter run
 ```
 
-`flutter create .` adds the Android/iOS platform folders around the existing `lib/` and `pubspec.yaml` files.
-
 ## Firebase setup
 
-See [`FIREBASE_SETUP.md`](FIREBASE_SETUP.md).
+Before login/signup works, connect your Firebase project:
 
-## Suggested GitHub repository name
+```bash
+flutterfire configure --project=your-firebase-project-id
+```
 
-`taskmate-flutter`
+Then enable these in Firebase Console:
 
-After you review the code, create a public GitHub repo and push this folder there.
+1. Authentication → Email/Password
+2. Cloud Firestore database
+
+## Note for students
+
+This version avoids advanced programming structure like many service/model/widget files. It uses simple classes, functions, if-statements, lists, and Firebase calls so it is easier to explain in class.

@@ -1,15 +1,15 @@
 # Firebase Setup for TaskMate
 
-Follow these steps before running the app on Android/iOS.
+Follow these steps before running the app.
 
 ## 1. Create Firebase project
 
 1. Open <https://console.firebase.google.com/>
-2. Create a project, for example: `taskmate-flutter`
+2. Create a project, for example: `smart-task-manager`
 3. Enable **Authentication → Sign-in method → Email/Password**
-4. Create **Cloud Firestore** in test mode first, then replace rules with the rules below
+4. Create **Cloud Firestore Database**
 
-## 2. Install CLIs
+## 2. Install Firebase tools
 
 ```bash
 dart pub global activate flutterfire_cli
@@ -17,25 +17,25 @@ npm install -g firebase-tools
 firebase login
 ```
 
-If `flutterfire` is not found after activation, add Dart pub cache to PATH:
+If `flutterfire` is not found, run:
 
 ```bash
 export PATH="$PATH:$HOME/.pub-cache/bin"
 ```
 
-## 3. Generate Firebase options
+## 3. Connect Firebase with Flutter
 
-From inside this project folder:
+Run this command inside the project folder:
 
 ```bash
-flutterfire configure --project=<your-firebase-project-id>
+flutterfire configure --project=your-firebase-project-id
 ```
 
-This replaces `lib/firebase_options.dart` with real Firebase app config and creates platform config files.
+This will update `lib/firebase_options.dart` with your real Firebase project settings.
 
 ## 4. Firestore security rules
 
-Use these rules so each user can only access their own tasks/profile:
+Use these rules in Firebase Console → Firestore → Rules:
 
 ```txt
 rules_version = '2';
@@ -56,11 +56,7 @@ service cloud.firestore {
 }
 ```
 
-## 5. Android reminder permission
-
-For Android 13+, notification permission is required. If reminders do not appear, grant notification permission from app settings. For exact alarms, Android may also require exact alarm permission depending on the device.
-
-## 6. Run
+## 5. Run the app
 
 ```bash
 flutter pub get
