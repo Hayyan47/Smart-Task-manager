@@ -6,18 +6,37 @@ This is a short summary written in my own words after reviewing the lecture note
 
 - **Flutter framework:** The app is built in Flutter with one codebase for mobile/web.
 - **Dart basics:** The code uses variables, strings, booleans, lists, maps, functions, classes, and if/else logic.
-- **Project structure:** Main code is in `lib/main.dart`, with dependencies in `pubspec.yaml`.
+- **Project structure:** The project now follows the requested simple file structure:
+
+```text
+lib/
+├── main.dart
+├── signup_screen.dart
+├── login_screen.dart
+└── home_screen.dart
+```
+
 - **Widgets:** The UI uses `MaterialApp`, `Scaffold`, `AppBar`, `Text`, `Icon`, `Card`, `ListView`, `Column`, `Row`, `DropdownButtonFormField`, `ElevatedButton`, and `FloatingActionButton`.
-- **StatelessWidget and StatefulWidget:** Login and home screens use state to update forms, search text, loading, and task board changes.
+- **StatelessWidget and StatefulWidget:** Login, signup, and home screens use state to update forms, loading, search text, and task board changes.
 - **Layout widgets:** The interface uses `Column`, `Row`, `Padding`, `Card`, and `ListView` for simple layout.
-- **Forms and validation:** Login/register uses `Form`, `GlobalKey<FormState>`, and `TextFormField` validators.
+- **Forms and validation:** Login/signup use `Form`, `GlobalKey<FormState>`, and `TextFormField` validators.
 - **Controllers:** Text input uses `TextEditingController`.
-- **Local storage:** `SharedPreferences` is used for the “Remember my email” option.
-- **Firebase:** Firebase Authentication is used for login/signup and Cloud Firestore is used to save tasks.
+- **Firebase Auth:** The auth flow uses only the important Firebase functions:
+  - Signup: `createUserWithEmailAndPassword(email, password)`
+  - Login: `signInWithEmailAndPassword(email, password)`
+  - Logout: `signOut()`
+- **Cloud Firestore:** Firestore is used to save and load tasks for each logged-in user.
+
+## App flow
+
+1. App opens on the Login Screen.
+2. New user clicks Sign Up, creates an account, then goes to Home.
+3. Existing user logs in and goes to Home.
+4. Home Screen has a logout button, which returns to Login.
 
 ## Extra project feature
 
-The task screen now works like a simple Jira/Kanban board:
+The task screen works like a simple Jira/Kanban board:
 
 1. To Do
 2. In Progress
