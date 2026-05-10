@@ -16,9 +16,8 @@ lib/main.dart
 - Add tasks
 - Edit tasks
 - Delete tasks
-- Mark tasks as completed
+- Move tasks like Jira/Kanban: To Do → In Progress → In Review → Done
 - Search tasks by title
-- Filter tasks by All, Today, Upcoming, and Completed
 - Store tasks in Firebase Firestore
 
 ## Main files

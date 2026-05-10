@@ -43,7 +43,8 @@ class StartPage extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
 
         if (snapshot.hasData) {
@@ -103,14 +104,18 @@ class _LoginPageState extends State<LoginPage> {
           password: password,
         );
       } else {
-        UserCredential result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        UserCredential result =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
 
         await result.user!.updateDisplayName(name);
 
-        await FirebaseFirestore.instance.collection('users').doc(result.user!.uid).set({
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(result.user!.uid)
+            .set({
           'name': name,
           'email': email,
           'createdAt': DateTime.now(),
@@ -126,7 +131,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -148,7 +154,8 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 30),
               Text(
                 isLogin ? 'LOGIN' : 'REGISTER',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               if (!isLogin)
@@ -190,7 +197,9 @@ class _LoginPageState extends State<LoginPage> {
                   });
                 },
                 child: Text(
-                  isLogin ? 'Do not have account? Register' : 'Already have account? Login',
+                  isLogin
+                      ? 'Do not have account? Register'
+                      : 'Already have account? Login',
                 ),
               ),
             ],
@@ -212,7 +221,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String searchText = '';
-  String selectedFilter = 'All';
+
+  // These are the Jira style stages.
+  // A task starts in To Do, then moves step by step until Done.
+  List<String> taskStatuses = ['To Do', 'In Progress', 'In Review', 'Done'];
 
   CollectionReference<Map<String, dynamic>> get taskCollection {
     return FirebaseFirestore.instance.collection('tasks');
@@ -226,8 +238,24 @@ class _HomePageState extends State<HomePage> {
     await taskCollection.doc(taskId).delete();
   }
 
-  Future<void> completeTask(String taskId, bool completed) async {
-    await taskCollection.doc(taskId).update({'completed': completed});
+  Future<void> moveTask(String taskId, String newStatus) async {
+    await taskCollection.doc(taskId).update({
+      'status': newStatus,
+      'completed': newStatus == 'Done',
+    });
+  }
+
+  // Old tasks may not have a status field, so this function gives them a default status.
+  String getTaskStatus(Map<String, dynamic> data) {
+    if (data['status'] != null) {
+      return data['status'];
+    }
+
+    if (data['completed'] == true) {
+      return 'Done';
+    }
+
+    return 'To Do';
   }
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> filterTasks(
@@ -238,19 +266,9 @@ class _HomePageState extends State<HomePage> {
     for (var task in tasks) {
       Map<String, dynamic> data = task.data();
       String title = (data['title'] ?? '').toString().toLowerCase();
-      bool completed = data['completed'] == true;
-      DateTime dueDate = readDate(data['dueDate']);
-      DateTime now = DateTime.now();
-      bool isToday = dueDate.year == now.year && dueDate.month == now.month && dueDate.day == now.day;
-      bool isUpcoming = dueDate.isAfter(now) && !isToday;
-
       bool matchesSearch = title.contains(searchText.toLowerCase());
-      bool matchesFilter = selectedFilter == 'All' ||
-          (selectedFilter == 'Today' && isToday) ||
-          (selectedFilter == 'Upcoming' && isUpcoming) ||
-          (selectedFilter == 'Completed' && completed);
 
-      if (matchesSearch && matchesFilter) {
+      if (matchesSearch) {
         result.add(task);
       }
     }
@@ -271,11 +289,18 @@ class _HomePageState extends State<HomePage> {
     return DateTime.now();
   }
 
+  Color statusColor(String status) {
+    if (status == 'To Do') return Colors.grey;
+    if (status == 'In Progress') return Colors.blue;
+    if (status == 'In Review') return Colors.orange;
+    return Colors.green;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TaskMate'),
+        title: const Text('TaskMate Board'),
         actions: [
           IconButton(
             onPressed: logout,
@@ -298,26 +323,11 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: DropdownButtonFormField<String>(
-              initialValue: selectedFilter,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
-              items: const [
-                DropdownMenuItem(value: 'All', child: Text('All Tasks')),
-                DropdownMenuItem(value: 'Today', child: Text('Today')),
-                DropdownMenuItem(value: 'Upcoming', child: Text('Upcoming')),
-                DropdownMenuItem(value: 'Completed', child: Text('Completed')),
-              ],
-              onChanged: (value) {
-                setState(() => selectedFilter = value ?? 'All');
-              },
-            ),
-          ),
-          const SizedBox(height: 8),
           Expanded(
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: taskCollection.where('userId', isEqualTo: widget.user.uid).snapshots(),
+              stream: taskCollection
+                  .where('userId', isEqualTo: widget.user.uid)
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Center(child: Text('Error loading tasks'));
@@ -327,78 +337,162 @@ class _HomePageState extends State<HomePage> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                List<QueryDocumentSnapshot<Map<String, dynamic>>> tasks = filterTasks(snapshot.data!.docs);
+                List<QueryDocumentSnapshot<Map<String, dynamic>>> allTasks =
+                    filterTasks(snapshot.data!.docs);
 
-                if (tasks.isEmpty) {
-                  return const Center(child: Text('No tasks yet. Press + to add task.'));
+                if (allTasks.isEmpty) {
+                  return const Center(
+                      child: Text('No tasks yet. Press + to add task.'));
                 }
 
-                return ListView.builder(
-                  itemCount: tasks.length,
-                  itemBuilder: (context, index) {
-                    var task = tasks[index];
-                    var data = task.data();
-                    DateTime dueDate = readDate(data['dueDate']);
-                    bool completed = data['completed'] == true;
-
-                    return Card(
-                      margin: const EdgeInsets.all(10),
-                      child: ListTile(
-                        leading: Checkbox(
-                          value: completed,
-                          onChanged: (value) {
-                            completeTask(task.id, value ?? false);
-                          },
-                        ),
-                        title: Text(
-                          data['title'] ?? '',
-                          style: TextStyle(
-                            decoration: completed ? TextDecoration.lineThrough : null,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Text(
-                          '${data['description'] ?? ''}\n'
-                          'Due: ${DateFormat('dd MMM yyyy, hh:mm a').format(dueDate)}\n'
-                          'Priority: ${data['priority']} | Category: ${data['category']}',
-                        ),
-                        isThreeLine: true,
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              openTaskForm(taskId: task.id, oldData: data);
-                            } else if (value == 'delete') {
-                              deleteTask(task.id);
-                            }
-                          },
-                          itemBuilder: (context) => const [
-                            PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            PopupMenuItem(value: 'delete', child: Text('Delete')),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                // This makes a simple Jira/Kanban board.
+                // Every status gets its own list.
+                return ListView(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  children: [
+                    for (String status in taskStatuses)
+                      buildStatusList(status, allTasks),
+                  ],
                 );
               },
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => openTaskForm(),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Task'),
       ),
     );
   }
 
-  Future<void> openTaskForm({String? taskId, Map<String, dynamic>? oldData}) async {
-    final titleController = TextEditingController(text: oldData?['title'] ?? '');
-    final descriptionController = TextEditingController(text: oldData?['description'] ?? '');
+  Widget buildStatusList(String status,
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> allTasks) {
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> statusTasks = [];
+
+    for (var task in allTasks) {
+      if (getTaskStatus(task.data()) == status) {
+        statusTasks.add(task);
+      }
+    }
+
+    return Card(
+      margin: const EdgeInsets.all(12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 8,
+                  backgroundColor: statusColor(status),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '$status (${statusTasks.length})',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (statusTasks.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(12),
+                child: Text('No tasks here'),
+              )
+            else
+              for (var task in statusTasks) buildTaskCard(task),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildTaskCard(QueryDocumentSnapshot<Map<String, dynamic>> task) {
+    Map<String, dynamic> data = task.data();
+    DateTime dueDate = readDate(data['dueDate']);
+    String status = getTaskStatus(data);
+
+    return Card(
+      color: const Color(0xFFF9FAFB),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    data['title'] ?? '',
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      openTaskForm(taskId: task.id, oldData: data);
+                    } else if (value == 'delete') {
+                      deleteTask(task.id);
+                    }
+                  },
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(value: 'edit', child: Text('Edit')),
+                    PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  ],
+                ),
+              ],
+            ),
+            Text(data['description'] ?? ''),
+            const SizedBox(height: 6),
+            Text('Due: ${DateFormat('dd MMM yyyy, hh:mm a').format(dueDate)}'),
+            Text(
+                'Priority: ${data['priority']} | Category: ${data['category']}'),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: status,
+              decoration: const InputDecoration(
+                labelText: 'Move task to',
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'To Do', child: Text('To Do')),
+                DropdownMenuItem(
+                    value: 'In Progress', child: Text('In Progress')),
+                DropdownMenuItem(value: 'In Review', child: Text('In Review')),
+                DropdownMenuItem(value: 'Done', child: Text('Done')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  moveTask(task.id, value);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> openTaskForm(
+      {String? taskId, Map<String, dynamic>? oldData}) async {
+    final titleController =
+        TextEditingController(text: oldData?['title'] ?? '');
+    final descriptionController =
+        TextEditingController(text: oldData?['description'] ?? '');
 
     String priority = oldData?['priority'] ?? 'Medium';
     String category = oldData?['category'] ?? 'Study';
-    DateTime dueDate = oldData == null ? DateTime.now().add(const Duration(days: 1)) : readDate(oldData['dueDate']);
+    String status = oldData == null ? 'To Do' : getTaskStatus(oldData);
+    DateTime dueDate = oldData == null
+        ? DateTime.now().add(const Duration(days: 1))
+        : readDate(oldData['dueDate']);
 
     await showDialog(
       context: context,
@@ -417,14 +511,16 @@ class _HomePageState extends State<HomePage> {
                     ),
                     TextField(
                       controller: descriptionController,
-                      decoration: const InputDecoration(labelText: 'Description'),
+                      decoration:
+                          const InputDecoration(labelText: 'Description'),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       initialValue: priority,
                       items: const [
                         DropdownMenuItem(value: 'Low', child: Text('Low')),
-                        DropdownMenuItem(value: 'Medium', child: Text('Medium')),
+                        DropdownMenuItem(
+                            value: 'Medium', child: Text('Medium')),
                         DropdownMenuItem(value: 'High', child: Text('High')),
                       ],
                       onChanged: (value) {
@@ -437,15 +533,32 @@ class _HomePageState extends State<HomePage> {
                       items: const [
                         DropdownMenuItem(value: 'Study', child: Text('Study')),
                         DropdownMenuItem(value: 'Work', child: Text('Work')),
-                        DropdownMenuItem(value: 'Personal', child: Text('Personal')),
+                        DropdownMenuItem(
+                            value: 'Personal', child: Text('Personal')),
                       ],
                       onChanged: (value) {
                         category = value ?? 'Study';
                       },
                       decoration: const InputDecoration(labelText: 'Category'),
                     ),
+                    DropdownButtonFormField<String>(
+                      initialValue: status,
+                      items: const [
+                        DropdownMenuItem(value: 'To Do', child: Text('To Do')),
+                        DropdownMenuItem(
+                            value: 'In Progress', child: Text('In Progress')),
+                        DropdownMenuItem(
+                            value: 'In Review', child: Text('In Review')),
+                        DropdownMenuItem(value: 'Done', child: Text('Done')),
+                      ],
+                      onChanged: (value) {
+                        status = value ?? 'To Do';
+                      },
+                      decoration: const InputDecoration(labelText: 'Status'),
+                    ),
                     const SizedBox(height: 12),
-                    Text('Due: ${DateFormat('dd MMM yyyy, hh:mm a').format(dueDate)}'),
+                    Text(
+                        'Due: ${DateFormat('dd MMM yyyy, hh:mm a').format(dueDate)}'),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -476,7 +589,8 @@ class _HomePageState extends State<HomePage> {
                           onPressed: () async {
                             TimeOfDay? pickedTime = await showTimePicker(
                               context: context,
-                              initialTime: TimeOfDay(hour: dueDate.hour, minute: dueDate.minute),
+                              initialTime: TimeOfDay(
+                                  hour: dueDate.hour, minute: dueDate.minute),
                             );
 
                             if (pickedTime != null) {
@@ -518,8 +632,9 @@ class _HomePageState extends State<HomePage> {
                       'description': description,
                       'priority': priority,
                       'category': category,
+                      'status': status,
                       'dueDate': dueDate,
-                      'completed': oldData?['completed'] ?? false,
+                      'completed': status == 'Done',
                       'createdAt': oldData?['createdAt'] ?? DateTime.now(),
                     };
 
