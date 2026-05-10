@@ -15,6 +15,7 @@ lib/
 ## What the app can do
 
 - Login/signup screens formatted to match the submitted TaskMate design PDF
+- Signup/Login now use purple top logo header with white form section like the screenshot
 - Proper app bar, dashboard header, footer, and blue TaskMate theme
 - Responsive wider layout for web/desktop while still working on phone
 - Code kept basic, human-readable, and commented for class explanation
