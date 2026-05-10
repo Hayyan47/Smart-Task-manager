@@ -147,19 +147,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 List<QueryDocumentSnapshot<Map<String, dynamic>>> allTasks =
                     filterTasks(snapshot.data!.docs);
 
-                if (allTasks.isEmpty) {
-                  return const Center(
-                      child: Text('No tasks yet. Press + to add task.'));
-                }
-
                 // This makes a simple Jira/Kanban board.
-                // Every status gets its own list.
-                return ListView(
-                  padding: const EdgeInsets.only(bottom: 80),
-                  children: [
-                    for (String status in taskStatuses)
-                      buildStatusList(status, allTasks),
-                  ],
+                // The columns go from left to right like Jira:
+                // To Do -> In Progress -> In Review -> Done.
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 80),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (String status in taskStatuses)
+                        buildStatusColumn(status, allTasks),
+                    ],
+                  ),
                 );
               },
             ),
@@ -174,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildStatusList(String status,
+  Widget buildStatusColumn(String status,
       List<QueryDocumentSnapshot<Map<String, dynamic>>> allTasks) {
     List<QueryDocumentSnapshot<Map<String, dynamic>>> statusTasks = [];
 
@@ -184,36 +184,43 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    return Card(
-      margin: const EdgeInsets.all(12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 8,
-                  backgroundColor: statusColor(status),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '$status (${statusTasks.length})',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (statusTasks.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(12),
-                child: Text('No tasks here'),
-              )
-            else
-              for (var task in statusTasks) buildTaskCard(task),
-          ],
+    return SizedBox(
+      width: 300,
+      child: Card(
+        margin: const EdgeInsets.only(right: 12, bottom: 12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 8,
+                    backgroundColor: statusColor(status),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '$status (${statusTasks.length})',
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: statusTasks.isEmpty
+                    ? const Center(child: Text('No tasks here'))
+                    : ListView(
+                        children: [
+                          for (var task in statusTasks) buildTaskCard(task),
+                        ],
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

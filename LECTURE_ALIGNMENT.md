@@ -36,7 +36,7 @@ lib/
 
 ## Extra project feature
 
-The task screen works like a simple Jira/Kanban board:
+The task screen works like a simple Jira/Kanban board, arranged left to right like Jira:
 
 1. To Do
 2. In Progress

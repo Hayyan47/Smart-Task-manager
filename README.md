@@ -20,7 +20,7 @@ lib/
 - Add tasks
 - Edit tasks
 - Delete tasks
-- Move tasks like Jira/Kanban: To Do → In Progress → In Review → Done
+- Move tasks like Jira/Kanban from left to right: To Do → In Progress → In Review → Done
 - Search tasks by title
 - Store tasks in Firebase Firestore
 
