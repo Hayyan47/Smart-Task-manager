@@ -1,0 +1,17 @@
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "smart-task-manager-9a794",
+          "configurations": {
+            "web": "1:943889886105:web:af859c47544ab78d8a4108"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

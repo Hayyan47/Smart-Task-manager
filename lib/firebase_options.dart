@@ -29,12 +29,13 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_WEB_API_KEY',
-    appId: 'REPLACE_WITH_WEB_APP_ID',
-    messagingSenderId: 'REPLACE_WITH_SENDER_ID',
-    projectId: 'REPLACE_WITH_PROJECT_ID',
-    authDomain: 'REPLACE_WITH_PROJECT_ID.firebaseapp.com',
-    storageBucket: 'REPLACE_WITH_PROJECT_ID.appspot.com',
+    apiKey: 'AIzaSyCpAu_QDbvFZU2kQI7RQKTqn1_f9BdTUlE',
+    appId: '1:943889886105:web:af859c47544ab78d8a4108',
+    messagingSenderId: '943889886105',
+    projectId: 'smart-task-manager-9a794',
+    authDomain: 'smart-task-manager-9a794.firebaseapp.com',
+    storageBucket: 'smart-task-manager-9a794.firebasestorage.app',
+    measurementId: 'G-BRWYLEKH82',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
