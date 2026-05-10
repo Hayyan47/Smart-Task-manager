@@ -95,12 +95,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 color: taskMateText,
               ),
             ),
-            const SizedBox(height: 6),
-            const Text(
-              'Sign in to continue',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: taskMateGrey),
-            ),
             const SizedBox(height: 8),
             const Text(
               'REGISTER',
