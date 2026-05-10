@@ -221,9 +221,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// This logo/header is used on both Login and Signup screens
-// to match the provided TaskMate design. The logo is created with Flutter
-// widgets, so we do not copy any copyrighted image from the internet.
+// This logo/header is used on both Login and Signup screens.
+// It uses the actual logo image from the submitted design document.
 class TaskMateLogo extends StatelessWidget {
   const TaskMateLogo({super.key});
 
@@ -232,127 +231,23 @@ class TaskMateLogo extends StatelessWidget {
     return Column(
       children: [
         Container(
-          height: 106,
-          width: 106,
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(30),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF1D4ED8).withValues(alpha: 0.28),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned(
-                top: 20,
-                left: 24,
-                right: 24,
-                child: Container(
-                  height: 66,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 32,
-                left: 38,
-                child: Container(
-                  width: 34,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF93C5FD),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 48,
-                left: 38,
-                child: Container(
-                  width: 42,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF93C5FD),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 64,
-                left: 38,
-                child: Container(
-                  width: 28,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF93C5FD),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-              const Positioned(
-                top: 25,
-                left: 17,
-                child: Icon(Icons.check_circle,
-                    color: Color(0xFF22C55E), size: 24),
-              ),
-              const Positioned(
-                top: 41,
-                left: 17,
-                child: Icon(Icons.check_circle,
-                    color: Color(0xFF22C55E), size: 24),
-              ),
-              const Positioned(
-                top: 57,
-                left: 17,
-                child: Icon(Icons.radio_button_unchecked,
-                    color: Color(0xFFCBD5E1), size: 24),
-              ),
-              Positioned(
-                right: 11,
-                bottom: 10,
-                child: Container(
-                  height: 34,
-                  width: 34,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF97316),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white, width: 3),
-                  ),
-                  child: const Icon(Icons.edit_rounded,
-                      color: Colors.white, size: 19),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 18),
-        const Text(
-          'TaskMate',
-          style: TextStyle(
-            fontSize: 40,
-            fontWeight: FontWeight.w900,
-            color: Color(0xFF111827),
-            letterSpacing: -1,
-          ),
-        ),
-        const SizedBox(height: 3),
-        const Text(
-          'Smart Task Manager',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF64748B),
+          child: Image.asset(
+            'assets/images/taskmate_logo.png',
+            width: 210,
+            height: 135,
+            fit: BoxFit.contain,
           ),
         ),
       ],
