@@ -219,10 +219,47 @@ class AuthPageFrame extends StatelessWidget {
                 Expanded(
                   flex: 4,
                   child: Center(
-                    child: Image.asset(
-                      'assets/images/taskmate_logo.png',
-                      width: 310,
-                      fit: BoxFit.contain,
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      margin: const EdgeInsets.symmetric(horizontal: 30),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.18),
+                            blurRadius: 24,
+                            offset: const Offset(0, 12),
+                          ),
+                        ],
+                      ),
+                      child: Image.asset(
+                        'assets/images/taskmate_logo.png',
+                        width: 280,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.checklist_rounded,
+                                  size: 58, color: taskMatePurple),
+                              SizedBox(height: 8),
+                              Text(
+                                'TaskMate',
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w900,
+                                  color: taskMateText,
+                                ),
+                              ),
+                              Text(
+                                'Smart Task Manager',
+                                style: TextStyle(color: taskMateGrey),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
