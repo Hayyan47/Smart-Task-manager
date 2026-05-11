@@ -5,11 +5,11 @@ import 'package:intl/intl.dart';
 
 import 'login_screen.dart';
 
-const Color mainBlue = Color(0xFF1D4ED8);
-const Color lightBlue = Color(0xFFDBEAFE);
+const Color mainBlue = taskMatePurple;
+const Color lightBlue = Color(0xFFF0E6FF);
 const Color darkText = Color(0xFF111827);
 const Color greyText = Color(0xFF64748B);
-const Color pageBackground = Color(0xFFF5F7FB);
+const Color pageBackground = Color(0xFFFAF8FF);
 
 // Home Screen designed as the task management/problem solving part.
 // User can add tasks, search tasks, and move tasks between boards.
@@ -153,59 +153,81 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: pageBackground,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(76),
+        preferredSize: const Size.fromHeight(132),
         child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF1D4ED8), Color(0xFF2563EB)],
+              colors: [taskMatePurple, Color(0xFF8E2BFF)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(28),
-              bottomRight: Radius.circular(28),
+              bottomLeft: Radius.circular(34),
+              bottomRight: Radius.circular(34),
             ),
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 6, 10, 10),
+              padding: const EdgeInsets.fromLTRB(18, 10, 12, 18),
               child: Row(
                 children: [
                   Container(
-                    height: 46,
-                    width: 46,
+                    height: 72,
+                    width: 96,
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.16),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                    child: const Icon(Icons.checklist_rounded,
-                        color: mainBlue, size: 30),
+                    child: Image.asset(
+                      'assets/images/taskmate_logo.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.checklist_rounded,
+                            color: taskMatePurple, size: 38);
+                      },
+                    ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'TaskMate',
+                          'TaskMate Dashboard',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 22,
+                            fontSize: 23,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
+                        SizedBox(height: 4),
                         Text(
-                          'Smart Task Manager',
+                          'Plan your tasks and track every stage',
                           style: TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    tooltip: 'Logout',
-                    onPressed: logout,
-                    icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: IconButton(
+                      tooltip: 'Logout',
+                      onPressed: logout,
+                      icon:
+                          const Icon(Icons.logout_rounded, color: Colors.white),
+                    ),
                   ),
                 ],
               ),
@@ -220,12 +242,12 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
+                  color: taskMatePurple.withValues(alpha: 0.10),
+                  blurRadius: 22,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
@@ -259,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           SizedBox(height: 3),
                           Text(
-                            'Swipe cards between boards like Jira',
+                            'Search, add, and swipe cards between boards',
                             style: TextStyle(color: greyText, fontSize: 13),
                           ),
                         ],
@@ -343,20 +365,27 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _FooterItem(icon: Icons.check_circle, label: 'Tasks'),
-            _FooterItem(icon: Icons.swipe, label: 'Swipe'),
-            _FooterItem(icon: Icons.cloud_done, label: 'Firebase'),
-          ],
+        color: taskMatePurple,
+        child: SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(32),
+                topRight: Radius.circular(32),
+              ),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _FooterItem(icon: Icons.check_circle, label: 'Tasks'),
+                _FooterItem(icon: Icons.swipe, label: 'Swipe'),
+                _FooterItem(icon: Icons.cloud_done, label: 'Firebase'),
+              ],
+            ),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
