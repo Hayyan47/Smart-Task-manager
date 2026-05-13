@@ -19,6 +19,7 @@ lib/
 - Proper app bar, dashboard header, and blue TaskMate theme
 - Proposal-style menu button with drawer options: All Tasks, Today, category filters, Completed, and Logout
 - Category button under the quick filters opens Study, Work, and Personal category choices
+- Profile Information tab in the menu shows name, Gmail/email, photo frame, and upload photo URL field
 - Responsive wider layout for web/desktop while still working on phone
 - Code kept basic, human-readable, and commented for class explanation
 - Register a new user

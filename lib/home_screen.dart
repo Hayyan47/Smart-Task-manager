@@ -166,6 +166,158 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> openProfileInformation() async {
+    User currentUser = FirebaseAuth.instance.currentUser ?? widget.user;
+    final nameController = TextEditingController(
+      text: currentUser.displayName ?? '',
+    );
+    final emailController = TextEditingController(
+      text: currentUser.email ?? 'No email found',
+    );
+    final photoController = TextEditingController(
+      text: currentUser.photoURL ?? '',
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            String photoUrl = photoController.text.trim();
+            bool hasPhoto = photoUrl.startsWith('http');
+
+            return AlertDialog(
+              title: const Text('Profile Information'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: lightBlue,
+                        borderRadius: BorderRadius.circular(22),
+                        border:
+                            Border.all(color: mainBlue.withValues(alpha: 0.28)),
+                      ),
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 48,
+                            backgroundColor: Colors.white,
+                            backgroundImage:
+                                hasPhoto ? NetworkImage(photoUrl) : null,
+                            child: hasPhoto
+                                ? null
+                                : const Icon(Icons.person_rounded,
+                                    size: 54, color: mainBlue),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Upload Photo Frame',
+                            style: TextStyle(
+                              color: mainBlue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Paste a photo link below to show it here',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: greyText, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: emailController,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Gmail / Email',
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: photoController,
+                      onChanged: (_) => setDialogState(() {}),
+                      decoration: const InputDecoration(
+                        labelText: 'Upload Photo URL',
+                        hintText: 'https://example.com/photo.png',
+                        prefixIcon: Icon(Icons.photo_camera_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        setDialogState(() {});
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Photo preview updated'),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.upload_file_rounded),
+                      label: const Text('Upload Photo'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    String name = nameController.text.trim();
+                    String photo = photoController.text.trim();
+
+                    await currentUser.updateDisplayName(name);
+                    await currentUser
+                        .updatePhotoURL(photo.isEmpty ? null : photo);
+                    await currentUser.reload();
+
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Profile updated')),
+                      );
+                    }
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    nameController.dispose();
+    emailController.dispose();
+    photoController.dispose();
+  }
+
+  void openProfileFromMenu() {
+    Navigator.pop(context);
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        openProfileInformation();
+      }
+    });
+  }
+
   Future<void> openCategoryPicker() async {
     String? category = await showModalBottomSheet<String>(
       context: context,
@@ -590,6 +742,12 @@ class _HomeScreenState extends State<HomeScreen> {
               label: 'All Tasks',
               selected: selectedMenuOption == 'All Tasks',
               onTap: () => selectMenuOption('All Tasks'),
+            ),
+            _MenuItem(
+              icon: Icons.account_circle_rounded,
+              label: 'Profile Information',
+              selected: false,
+              onTap: openProfileFromMenu,
             ),
             _MenuItem(
               icon: Icons.today_rounded,
