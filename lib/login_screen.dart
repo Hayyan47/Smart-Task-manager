@@ -207,44 +207,32 @@ class AuthPageFrame extends StatelessWidget {
             child: Column(
               children: [
                 Expanded(
-                  flex: 4,
+                  flex: 3,
                   child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(14),
-                      margin: const EdgeInsets.symmetric(horizontal: 30),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.18),
-                            blurRadius: 24,
-                            offset: const Offset(0, 12),
-                          ),
-                        ],
-                      ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
                       child: Image.asset(
                         'assets/images/taskmate_logo.png',
-                        width: 280,
-                        fit: BoxFit.contain,
+                        width: 310,
+                        fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return const Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.checklist_rounded,
-                                  size: 58, color: taskMatePurple),
+                                  size: 58, color: Colors.white),
                               SizedBox(height: 8),
                               Text(
                                 'TaskMate',
                                 style: TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.w900,
-                                  color: taskMateText,
+                                  color: Colors.white,
                                 ),
                               ),
                               Text(
                                 'Smart Task Manager',
-                                style: TextStyle(color: taskMateGrey),
+                                style: TextStyle(color: Colors.white70),
                               ),
                             ],
                           );

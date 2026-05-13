@@ -552,12 +552,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   end: Alignment.bottomRight,
                 ),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.task_alt_rounded, color: Colors.white, size: 42),
-                  SizedBox(height: 10),
-                  Text(
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.asset(
+                      'assets/images/taskmate_logo.png',
+                      height: 74,
+                      width: 160,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.task_alt_rounded,
+                            color: Colors.white, size: 42);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
                     'TaskMate Menu',
                     style: TextStyle(
                       color: Colors.white,
@@ -565,8 +577,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
+                  const SizedBox(height: 4),
+                  const Text(
                     'Quickly open the task view you need',
                     style: TextStyle(color: Colors.white70),
                   ),

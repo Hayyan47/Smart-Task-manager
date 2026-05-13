@@ -15,7 +15,7 @@ lib/
 ## What the app can do
 
 - Login/signup screens formatted to match the submitted TaskMate design PDF
-- Signup/Login now use purple top logo header with white form section like the screenshot
+- Signup/Login now use the TaskMate logo directly in the purple top header with no extra white logo card
 - Proper app bar, dashboard header, and blue TaskMate theme
 - Proposal-style menu button with drawer options: All Tasks, Today, category filters, Completed, and Logout
 - Category button under the quick filters opens Study, Work, and Personal category choices
