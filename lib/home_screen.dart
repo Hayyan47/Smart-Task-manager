@@ -446,30 +446,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        color: taskMatePurple,
-        child: SafeArea(
-          top: false,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(32),
-                topRight: Radius.circular(32),
-              ),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _FooterItem(icon: Icons.check_circle, label: 'Tasks'),
-                _FooterItem(icon: Icons.swipe, label: 'Swipe'),
-                _FooterItem(icon: Icons.cloud_done, label: 'Firebase'),
-              ],
-            ),
-          ),
-        ),
-      ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: mainBlue,
         foregroundColor: Colors.white,
@@ -986,32 +962,6 @@ class _MenuItem extends StatelessWidget {
       selected: selected,
       selectedTileColor: lightBlue,
       onTap: onTap,
-    );
-  }
-}
-
-class _FooterItem extends StatelessWidget {
-  const _FooterItem({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: mainBlue, size: 22),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: greyText,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 }
