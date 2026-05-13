@@ -30,6 +30,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String searchText = '';
   String selectedMenuOption = 'All Tasks';
+  List<String> categoryOptions = ['Study', 'Work', 'Personal'];
 
   // These are the Jira style stages.
   // A task starts in To Do, then moves step by step until Done.
@@ -129,8 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
       return data['priority'] == 'High';
     }
 
-    if (selectedMenuOption == 'Study') {
-      return data['category'] == 'Study';
+    if (selectedMenuOption.startsWith('Category: ')) {
+      String category = selectedMenuOption.replaceFirst('Category: ', '');
+      return data['category'] == category;
     }
 
     if (selectedMenuOption == 'Completed') {
@@ -143,7 +145,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String menuSubtitle() {
     if (selectedMenuOption == 'Today') return 'Tasks due today';
     if (selectedMenuOption == 'High Priority') return 'Important tasks first';
-    if (selectedMenuOption == 'Study') return 'Study category tasks';
+    if (selectedMenuOption.startsWith('Category: ')) {
+      String category = selectedMenuOption.replaceFirst('Category: ', '');
+      return '$category category tasks';
+    }
     if (selectedMenuOption == 'Completed') return 'Finished task list';
     return 'All your tasks in one place';
   }
@@ -153,6 +158,63 @@ class _HomeScreenState extends State<HomeScreen> {
       selectedMenuOption = option;
     });
     Navigator.pop(context);
+  }
+
+  void selectCategory(String category) {
+    setState(() {
+      selectedMenuOption = 'Category: $category';
+    });
+  }
+
+  Future<void> openCategoryPicker() async {
+    String? category = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Choose Category',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                for (String category in categoryOptions)
+                  ListTile(
+                    leading:
+                        const Icon(Icons.category_rounded, color: mainBlue),
+                    title: Text(category),
+                    trailing: selectedMenuOption == 'Category: $category'
+                        ? const Icon(Icons.check_circle, color: mainBlue)
+                        : null,
+                    onTap: () => Navigator.pop(context, category),
+                  ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.clear_rounded, color: greyText),
+                  title: const Text('Show All Tasks'),
+                  onTap: () => Navigator.pop(context, 'All Tasks'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (category == null) return;
+
+    if (category == 'All Tasks') {
+      setState(() => selectedMenuOption = 'All Tasks');
+    } else {
+      selectCategory(category);
+    }
   }
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> filterTasks(
@@ -386,10 +448,28 @@ class _HomeScreenState extends State<HomeScreen> {
                     _HeaderChip(
                       icon: Icons.category,
                       text: 'Category',
-                      selected: selectedMenuOption == 'Study',
-                      onTap: () => setState(() => selectedMenuOption = 'Study'),
+                      selected: selectedMenuOption.startsWith('Category: '),
+                      onTap: openCategoryPicker,
                     ),
                   ],
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: openCategoryPicker,
+                  icon: const Icon(Icons.category_rounded),
+                  label: Text(
+                    selectedMenuOption.startsWith('Category: ')
+                        ? selectedMenuOption
+                        : 'Choose Category',
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: mainBlue,
+                    minimumSize: const Size(double.infinity, 46),
+                    side: const BorderSide(color: mainBlue),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -513,9 +593,21 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             _MenuItem(
               icon: Icons.school_rounded,
-              label: 'Study',
-              selected: selectedMenuOption == 'Study',
-              onTap: () => selectMenuOption('Study'),
+              label: 'Study Category',
+              selected: selectedMenuOption == 'Category: Study',
+              onTap: () => selectMenuOption('Category: Study'),
+            ),
+            _MenuItem(
+              icon: Icons.work_rounded,
+              label: 'Work Category',
+              selected: selectedMenuOption == 'Category: Work',
+              onTap: () => selectMenuOption('Category: Work'),
+            ),
+            _MenuItem(
+              icon: Icons.person_rounded,
+              label: 'Personal Category',
+              selected: selectedMenuOption == 'Category: Personal',
+              onTap: () => selectMenuOption('Category: Personal'),
             ),
             _MenuItem(
               icon: Icons.check_circle_rounded,
