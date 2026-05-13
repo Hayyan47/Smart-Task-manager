@@ -29,6 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String searchText = '';
+  String selectedMenuOption = 'All Tasks';
 
   // These are the Jira style stages.
   // A task starts in To Do, then moves step by step until Done.
@@ -110,6 +111,50 @@ class _HomeScreenState extends State<HomeScreen> {
     return 'To Do';
   }
 
+  bool isSameDay(DateTime first, DateTime second) {
+    return first.year == second.year &&
+        first.month == second.month &&
+        first.day == second.day;
+  }
+
+  bool matchesSelectedMenu(Map<String, dynamic> data) {
+    String status = getTaskStatus(data);
+    DateTime dueDate = readDate(data['dueDate']);
+
+    if (selectedMenuOption == 'Today') {
+      return isSameDay(dueDate, DateTime.now());
+    }
+
+    if (selectedMenuOption == 'High Priority') {
+      return data['priority'] == 'High';
+    }
+
+    if (selectedMenuOption == 'Study') {
+      return data['category'] == 'Study';
+    }
+
+    if (selectedMenuOption == 'Completed') {
+      return status == 'Done';
+    }
+
+    return true;
+  }
+
+  String menuSubtitle() {
+    if (selectedMenuOption == 'Today') return 'Tasks due today';
+    if (selectedMenuOption == 'High Priority') return 'Important tasks first';
+    if (selectedMenuOption == 'Study') return 'Study category tasks';
+    if (selectedMenuOption == 'Completed') return 'Finished task list';
+    return 'All your tasks in one place';
+  }
+
+  void selectMenuOption(String option) {
+    setState(() {
+      selectedMenuOption = option;
+    });
+    Navigator.pop(context);
+  }
+
   List<QueryDocumentSnapshot<Map<String, dynamic>>> filterTasks(
     List<QueryDocumentSnapshot<Map<String, dynamic>>> tasks,
   ) {
@@ -119,8 +164,9 @@ class _HomeScreenState extends State<HomeScreen> {
       Map<String, dynamic> data = task.data();
       String title = (data['title'] ?? '').toString().toLowerCase();
       bool matchesSearch = title.contains(searchText.toLowerCase());
+      bool matchesMenu = matchesSelectedMenu(data);
 
-      if (matchesSearch) {
+      if (matchesSearch && matchesMenu) {
         result.add(task);
       }
     }
@@ -152,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: pageBackground,
+      drawer: buildMenuDrawer(),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(132),
         child: Container(
@@ -171,9 +218,26 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.fromLTRB(18, 10, 12, 18),
               child: Row(
                 children: [
+                  Builder(
+                    builder: (context) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: IconButton(
+                          tooltip: 'Open menu',
+                          onPressed: () => Scaffold.of(context).openDrawer(),
+                          icon: const Icon(Icons.menu_rounded,
+                              color: Colors.white),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 10),
                   Container(
                     height: 72,
-                    width: 96,
+                    width: 82,
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -196,23 +260,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(width: 14),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           'TaskMate Dashboard',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 23,
+                            fontSize: 21,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          'Plan your tasks and track every stage',
-                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                          menuSubtitle(),
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 13),
                         ),
                       ],
                     ),
@@ -267,22 +332,23 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: mainBlue, size: 30),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Plan, Track, Complete',
-                            style: TextStyle(
+                            selectedMenuOption,
+                            style: const TextStyle(
                               color: darkText,
                               fontSize: 19,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 3),
+                          const SizedBox(height: 3),
                           Text(
-                            'Search, add, and swipe cards between boards',
-                            style: TextStyle(color: greyText, fontSize: 13),
+                            menuSubtitle(),
+                            style:
+                                const TextStyle(color: greyText, fontSize: 13),
                           ),
                         ],
                       ),
@@ -300,13 +366,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 const SizedBox(height: 8),
-                const Row(
+                Row(
                   children: [
-                    _HeaderChip(icon: Icons.today, text: 'Today'),
-                    SizedBox(width: 8),
-                    _HeaderChip(icon: Icons.flag, text: 'Priority'),
-                    SizedBox(width: 8),
-                    _HeaderChip(icon: Icons.category, text: 'Category'),
+                    _HeaderChip(
+                      icon: Icons.today,
+                      text: 'Today',
+                      selected: selectedMenuOption == 'Today',
+                      onTap: () => setState(() => selectedMenuOption = 'Today'),
+                    ),
+                    const SizedBox(width: 8),
+                    _HeaderChip(
+                      icon: Icons.flag,
+                      text: 'Priority',
+                      selected: selectedMenuOption == 'High Priority',
+                      onTap: () =>
+                          setState(() => selectedMenuOption = 'High Priority'),
+                    ),
+                    const SizedBox(width: 8),
+                    _HeaderChip(
+                      icon: Icons.category,
+                      text: 'Category',
+                      selected: selectedMenuOption == 'Study',
+                      onTap: () => setState(() => selectedMenuOption = 'Study'),
+                    ),
                   ],
                 ),
               ],
@@ -394,6 +476,86 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () => openTaskForm(),
         icon: const Icon(Icons.add),
         label: const Text('Add Task'),
+      ),
+    );
+  }
+
+  Widget buildMenuDrawer() {
+    return Drawer(
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [taskMatePurple, Color(0xFF8E2BFF)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.task_alt_rounded, color: Colors.white, size: 42),
+                  SizedBox(height: 10),
+                  Text(
+                    'TaskMate Menu',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Quickly open the task view you need',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+            _MenuItem(
+              icon: Icons.dashboard_rounded,
+              label: 'All Tasks',
+              selected: selectedMenuOption == 'All Tasks',
+              onTap: () => selectMenuOption('All Tasks'),
+            ),
+            _MenuItem(
+              icon: Icons.today_rounded,
+              label: 'Today',
+              selected: selectedMenuOption == 'Today',
+              onTap: () => selectMenuOption('Today'),
+            ),
+            _MenuItem(
+              icon: Icons.flag_rounded,
+              label: 'High Priority',
+              selected: selectedMenuOption == 'High Priority',
+              onTap: () => selectMenuOption('High Priority'),
+            ),
+            _MenuItem(
+              icon: Icons.school_rounded,
+              label: 'Study',
+              selected: selectedMenuOption == 'Study',
+              onTap: () => selectMenuOption('Study'),
+            ),
+            _MenuItem(
+              icon: Icons.check_circle_rounded,
+              label: 'Completed',
+              selected: selectedMenuOption == 'Completed',
+              onTap: () => selectMenuOption('Completed'),
+            ),
+            const Spacer(),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.logout_rounded, color: mainBlue),
+              title: const Text('Logout'),
+              onTap: logout,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -750,35 +912,80 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _HeaderChip extends StatelessWidget {
-  const _HeaderChip({required this.icon, required this.text});
+  const _HeaderChip({
+    required this.icon,
+    required this.text,
+    required this.selected,
+    required this.onTap,
+  });
 
   final IconData icon;
   final String text;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    Color chipColor = selected ? mainBlue : lightBlue;
+    Color itemColor = selected ? Colors.white : mainBlue;
+
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 9),
-        decoration: BoxDecoration(
-          color: lightBlue,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 18, color: mainBlue),
-            const SizedBox(height: 3),
-            Text(
-              text,
-              style: const TextStyle(
-                color: mainBlue,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          decoration: BoxDecoration(
+            color: chipColor,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 18, color: itemColor),
+              const SizedBox(height: 3),
+              Text(
+                text,
+                style: TextStyle(
+                  color: itemColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _MenuItem extends StatelessWidget {
+  const _MenuItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: selected ? mainBlue : greyText),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: selected ? mainBlue : darkText,
+          fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+        ),
+      ),
+      selected: selected,
+      selectedTileColor: lightBlue,
+      onTap: onTap,
     );
   }
 }
