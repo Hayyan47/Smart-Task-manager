@@ -184,40 +184,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: lightBlue,
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: mainBlue.withValues(alpha: 0.28)),
-                  ),
-                  child: const Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 48,
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.person_rounded,
-                            size: 54, color: mainBlue),
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        'Profile Photo Frame',
-                        style: TextStyle(
-                          color: mainBlue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Photo URL upload removed',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: greyText, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
                 TextField(
                   controller: nameController,
                   decoration: const InputDecoration(
