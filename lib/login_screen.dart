@@ -8,14 +8,7 @@ const Color taskMatePurple = Color(0xFF7100F3);
 const Color taskMateText = Color(0xFF202124);
 const Color taskMateGrey = Color(0xFF6B7280);
 
-// Login Screen designed according to the submitted PDF/screenshot.
-// Problem solved here:
-// 1. Student enters email and password.
-// 2. App checks/validates the fields.
-// 3. Firebase logs in the user.
-// 4. User moves to HomeScreen.
-// Firebase function used here:
-// signInWithEmailAndPassword(email, password)
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
